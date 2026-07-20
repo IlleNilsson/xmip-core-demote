@@ -1,0 +1,12 @@
+[package]
+name = "xmip-demote"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/IlleNilsson/xmip-demote"
+description = "Demotion from Xmip Message Context into structured messages and executable artifacts."
+
+[dependencies]
+xmip-context = { git = "https://github.com/IlleNilsson/xmip-context", rev = "a6220c984c4ec4edffbcc45d578a9a98d0b2242a" }
+xmip-contract = { git = "https://github.com/IlleNilsson/xmip-contract", rev = "8de0c03a12d9fc038a2a521bea164533643479b3" }
+xmip-path = { git = "https://github.com/IlleNilsson/xmip-path", rev = "312148fa9206baccff0a511aede8e2460865c8f8" }
