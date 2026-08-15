@@ -2,7 +2,7 @@
 name = "xmip-demote"
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 repository = "https://github.com/IlleNilsson/xmip-demote"
 description = "Demotion from Xmip Message Context into structured messages and executable artifacts."
 
