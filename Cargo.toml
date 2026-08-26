@@ -2,14 +2,14 @@
 [workspace]
 
 [package]
-name = "xmip-demote"
+name = "xmip-core-demote"
 version = "0.1.0"
 edition = "2024"
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/IlleNilsson/xmip-demote"
+repository = "https://github.com/IlleNilsson/xmip-core-demote"
 description = "Demotion from Xmip Message Context into structured messages and executable artifacts."
 
 [dependencies]
-xmip-context = { git = "https://github.com/IlleNilsson/xmip-context", rev = "a6220c984c4ec4edffbcc45d578a9a98d0b2242a" }
-xmip-contract = { git = "https://github.com/IlleNilsson/xmip-contract", rev = "8de0c03a12d9fc038a2a521bea164533643479b3" }
-xmip-path = { git = "https://github.com/IlleNilsson/xmip-path", rev = "312148fa9206baccff0a511aede8e2460865c8f8" }
+xmip-context = { package = "xmip-core-context", git = "https://github.com/IlleNilsson/xmip-core-context", branch = "main" }
+xmip-contract = { package = "xmip-core-contract", git = "https://github.com/IlleNilsson/xmip-core-contract", branch = "main" }
+xmip-path = { package = "xmip-core-path", git = "https://github.com/IlleNilsson/xmip-core-path", branch = "main" }
