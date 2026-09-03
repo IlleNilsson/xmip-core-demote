@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 
 use xmip_context::{ContextValue, MessageContext};
-use xmip_contract::{ContractError, StructuredValue, StructureWriter};
+use xmip_contract::{ContractError, StructureWriter, StructuredValue};
 use xmip_path::{Path, PathEngine};
 
 /// Which surface a value is written onto.
