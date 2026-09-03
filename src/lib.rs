@@ -78,6 +78,17 @@ pub fn apply_to_artifact(
     Ok(())
 }
 
+fn convert(value: ContextValue) -> StructuredValue {
+    match value {
+        ContextValue::Null => StructuredValue::Null,
+        ContextValue::Bool(value) => StructuredValue::Bool(value),
+        ContextValue::Integer(value) => StructuredValue::Integer(value),
+        ContextValue::Decimal(value) => StructuredValue::Decimal(value),
+        ContextValue::Text(value) => StructuredValue::Text(value),
+        ContextValue::Binary(value) => StructuredValue::Binary(value),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,16 +149,5 @@ mod tests {
         .expect("write");
 
         assert!(recorder.written.is_empty());
-    }
-}
-
-fn convert(value: ContextValue) -> StructuredValue {
-    match value {
-        ContextValue::Null => StructuredValue::Null,
-        ContextValue::Bool(value) => StructuredValue::Bool(value),
-        ContextValue::Integer(value) => StructuredValue::Integer(value),
-        ContextValue::Decimal(value) => StructuredValue::Decimal(value),
-        ContextValue::Text(value) => StructuredValue::Text(value),
-        ContextValue::Binary(value) => StructuredValue::Binary(value),
     }
 }
