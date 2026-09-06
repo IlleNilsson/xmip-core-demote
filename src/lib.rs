@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 
 use context::{ContextValue, MessageContext};
-use contract::{ContractError, StructureWriter, StructuredValue};
+use contract::{ContractError, StructureWriter};
 use path::{Path, PathEngine};
 
 /// Which surface a value is written onto.
@@ -59,7 +59,9 @@ pub fn apply_to_structure(
         }
 
         if let Some(value) = context.get(&demotion.context_key) {
-            engine.write(writer, &demotion.target_path, convert(value.clone()))?;
+            // A promoted property and a structured field are one type now
+            // (core::ScalarValue), so it writes straight in with no conversion.
+            engine.write(writer, &demotion.target_path, value.clone())?;
         }
     }
     Ok(())
@@ -76,17 +78,6 @@ pub fn apply_to_artifact(
         }
     }
     Ok(())
-}
-
-fn convert(value: ContextValue) -> StructuredValue {
-    match value {
-        ContextValue::Null => StructuredValue::Null,
-        ContextValue::Bool(value) => StructuredValue::Bool(value),
-        ContextValue::Integer(value) => StructuredValue::Integer(value),
-        ContextValue::Decimal(value) => StructuredValue::Decimal(value),
-        ContextValue::Text(value) => StructuredValue::Text(value),
-        ContextValue::Binary(value) => StructuredValue::Binary(value),
-    }
 }
 
 #[cfg(test)]
