@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
 
 use context::{ContextValue, MessageContext};
-use contract::{ContractError, StructureWriter};
 use path::{Path, PathEngine};
+use sdk::contract::{ContractError, StructureWriter};
 
 /// Which surface a value is written onto.
 ///
