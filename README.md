@@ -11,5 +11,5 @@ can create a Stream. It does not decide what to write; a Path and a content
 selector do.
 
 `doc/architecture/runtime-model.md` section 9 governs it, and the selector
-language is `module/capability/promote/doc/content-selector.md`;
+language is `module/core/capability/promote/doc/content-selector.md`;
 `architecture.toml` carries the maturity.
