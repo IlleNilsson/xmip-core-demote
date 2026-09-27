@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
 
 use context::{ContextValue, MessageContext};
-use contract::{ContractError, StructureWriter};
-use path::{Path, PathEngine};
+use contract::ContractError;
+use path::{CompiledPath, Path, PathEngine, Rewriting};
 
 /// Which surface a value is written onto.
 ///
@@ -34,6 +34,33 @@ pub struct Demotion {
     pub target_path: Path,
 }
 
+impl Demotion {
+    /// This demotion with its Path compiled through `engine`, once, when
+    /// configuration is read — when it writes into the payload. `None` for
+    /// every other target: a header or a transport property is not the
+    /// payload's to write, and silently writing it there instead would
+    /// corrupt content to satisfy a routing concern.
+    ///
+    /// # Errors
+    /// The Path's language is not loaded, or refuses its expression.
+    pub fn compile(&self, engine: &PathEngine) -> Result<Option<PayloadDemotion>, ContractError> {
+        if self.target != DemotionTarget::PayloadElement {
+            return Ok(None);
+        }
+        Ok(Some(PayloadDemotion {
+            context_key: self.context_key.clone(),
+            path: engine.compile(&self.target_path)?,
+        }))
+    }
+}
+
+/// A demotion into the payload, its Path compiled.
+#[derive(Debug)]
+pub struct PayloadDemotion {
+    pub context_key: String,
+    pub path: CompiledPath,
+}
+
 pub trait ArtifactTarget {
     fn write_value(
         &mut self,
@@ -43,25 +70,22 @@ pub trait ArtifactTarget {
     ) -> Result<(), String>;
 }
 
+/// Write each demoted value into the payload being rewritten; a context key
+/// the Message does not hold writes nothing. The rewrite produces the new
+/// Stream (ADR-0013).
+///
+/// # Errors
+/// A Path could not write its value.
 pub fn apply_to_structure(
     context: &MessageContext,
-    writer: &mut dyn StructureWriter,
-    engine: &dyn PathEngine,
-    demotions: &[Demotion],
+    rewriting: &mut Rewriting,
+    demotions: &[PayloadDemotion],
 ) -> Result<(), ContractError> {
     for demotion in demotions {
-        // A StructureWriter reaches inside the payload and nowhere else. A
-        // header or a transport property is not this function's to write, and
-        // silently writing it into the payload instead would corrupt content
-        // to satisfy a routing concern.
-        if demotion.target != DemotionTarget::PayloadElement {
-            continue;
-        }
-
         if let Some(value) = context.get(&demotion.context_key) {
-            // A promoted property and a structured field are one type now
+            // A promoted property and a structured field are one type
             // (core::ScalarValue), so it writes straight in with no conversion.
-            engine.write(writer, &demotion.target_path, value.clone())?;
+            demotion.path.write(rewriting, value.clone())?;
         }
     }
     Ok(())
@@ -140,5 +164,88 @@ mod tests {
         .expect("write");
 
         assert!(recorder.written.is_empty());
+    }
+
+    /// A language whose expression is `key=` in text, the value after it
+    /// rewritten up to the next `;`.
+    struct KeyValue;
+
+    struct Key(String);
+
+    impl path::PathLanguage for KeyValue {
+        fn language(&self) -> &'static str {
+            "key-value"
+        }
+
+        fn compile(
+            &self,
+            expression: &str,
+        ) -> Result<Box<dyn path::CompiledExpression>, ContractError> {
+            Ok(Box::new(Key(format!("{expression}="))))
+        }
+    }
+
+    impl path::CompiledExpression for Key {
+        fn read(&self, _: &path::Content<'_>) -> Result<Option<ContextValue>, ContractError> {
+            Ok(None)
+        }
+
+        fn write(
+            &self,
+            rewriting: &mut Rewriting,
+            value: ContextValue,
+        ) -> Result<(), ContractError> {
+            let written = value.text().ok_or_else(|| ContractError::new("no text"))?;
+            let text = rewriting.form_mut::<String>()?;
+            let start = text
+                .find(&self.0)
+                .ok_or_else(|| ContractError::new("absent"))?
+                + self.0.len();
+            let end = text[start..].find(';').map_or(text.len(), |at| start + at);
+            text.replace_range(start..end, &written);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn only_a_payload_demotion_compiles_and_it_rewrites_the_stream() {
+        let engine = PathEngine::new(vec![Box::new(KeyValue)]);
+        let into_payload = |key: &str| Demotion {
+            context_key: key.to_string(),
+            target: DemotionTarget::PayloadElement,
+            target_path: Path::new("key-value", key),
+        };
+        assert!(
+            demotion("order", DemotionTarget::StreamHeader)
+                .compile(&engine)
+                .expect("not the payload's")
+                .is_none()
+        );
+        let demotions: Vec<PayloadDemotion> = ["status", "absent"]
+            .map(|key| into_payload(key).compile(&engine).expect("compiles"))
+            .into_iter()
+            .flatten()
+            .collect();
+        let context =
+            MessageContext::new().with_value("status", ContextValue::Text("closed".into()));
+        let source = stream::Stream::new(
+            xcore::StreamId::new(1),
+            b"order=A-1;status=open".to_vec(),
+            None,
+        );
+        let mut rewriting = Rewriting::of(&source, xcore::StreamId::new(2));
+
+        apply_to_structure(&context, &mut rewriting, &demotions).expect("writes");
+
+        let written = rewriting.finish().expect("finishes");
+        assert_eq!(written.bytes(), b"order=A-1;status=closed");
+        assert!(
+            Demotion {
+                target_path: Path::new("xpath", "/order"),
+                ..into_payload("status")
+            }
+            .compile(&engine)
+            .is_err()
+        );
     }
 }
