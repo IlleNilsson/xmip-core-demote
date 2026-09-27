@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 
-use context::{ContextValue, MessageContext};
+use context::MessageContext;
+
 use contract::ContractError;
 use path::{CompiledPath, Path, PathEngine, Rewriting};
+use xcore::ScalarValue;
 
 /// Which surface a value is written onto.
 ///
@@ -66,7 +68,7 @@ pub trait ArtifactTarget {
         &mut self,
         target: DemotionTarget,
         path: &Path,
-        value: &ContextValue,
+        value: &ScalarValue,
     ) -> Result<(), String>;
 }
 
@@ -118,7 +120,7 @@ mod tests {
             &mut self,
             target: DemotionTarget,
             path: &Path,
-            _value: &ContextValue,
+            _value: &ScalarValue,
         ) -> Result<(), String> {
             self.written.push((target, path.expression.clone()));
             Ok(())
@@ -136,8 +138,8 @@ mod tests {
     #[test]
     fn an_artifact_target_is_told_which_surface_to_write() {
         let context = MessageContext::new()
-            .with_value("order.id", ContextValue::Text("A-1".into()))
-            .with_value("trace.id", ContextValue::Text("T-1".into()));
+            .with_value("order.id", ScalarValue::Text("A-1".into()))
+            .with_value("trace.id", ScalarValue::Text("T-1".into()));
 
         let mut recorder = Recorder::default();
         let demotions = [
@@ -186,14 +188,14 @@ mod tests {
     }
 
     impl path::CompiledExpression for Key {
-        fn read(&self, _: &path::Content<'_>) -> Result<Option<ContextValue>, ContractError> {
+        fn read(&self, _: &path::Content<'_>) -> Result<Option<ScalarValue>, ContractError> {
             Ok(None)
         }
 
         fn write(
             &self,
             rewriting: &mut Rewriting,
-            value: ContextValue,
+            value: ScalarValue,
         ) -> Result<(), ContractError> {
             let written = value.text().ok_or_else(|| ContractError::new("no text"))?;
             let text = rewriting.form_mut::<String>()?;
@@ -227,7 +229,7 @@ mod tests {
             .flatten()
             .collect();
         let context =
-            MessageContext::new().with_value("status", ContextValue::Text("closed".into()));
+            MessageContext::new().with_value("status", ScalarValue::Text("closed".into()));
         let source = stream::Stream::new(
             xcore::StreamId::new(1),
             b"order=A-1;status=open".to_vec(),
