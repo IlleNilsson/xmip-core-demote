@@ -14,5 +14,10 @@ context = { package = "xmip-core-context", git = "https://github.com/IlleNilsson
 contract = { package = "xmip-core-contract", git = "https://github.com/IlleNilsson/xmip-core-contract", branch = "main" }
 path = { package = "xmip-core-path", git = "https://github.com/IlleNilsson/xmip-core-path", branch = "main" }
 
+[dev-dependencies]
+# Only the tests build a Stream to rewrite.
+stream = { package = "xmip-core-stream", git = "https://github.com/IlleNilsson/xmip-core-stream", branch = "main" }
+xcore = { package = "xmip-core", git = "https://github.com/IlleNilsson/xmip-core", branch = "main" }
+
 [profile.dev.package."*"]
 opt-level = 3
