@@ -165,7 +165,7 @@ mod tests {
         )
         .expect("write");
 
-        assert!(recorder.written.is_empty());
+        assert_eq!(recorder.written, [] as [(DemotionTarget, String); 0]);
     }
 
     /// A language whose expression is `key=` in text, the value after it
