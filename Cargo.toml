@@ -9,10 +9,19 @@ license = "AGPL-3.0-or-later"
 repository = "https://github.com/IlleNilsson/xmip-core-demote"
 description = "Demotion from Xmip Message Context into structured messages and executable artifacts."
 
+[features]
+# The demotion's code and what it is built on. Without it the crate is the
+# Demote unit's declaration alone, which configure reads the standard module
+# by.
+default = ["units"]
+units = ["dep:context", "dep:contract", "dep:path"]
+
 [dependencies]
-context = { package = "xmip-core-context", git = "https://github.com/IlleNilsson/xmip-core-context", branch = "main" }
-contract = { package = "xmip-core-contract", git = "https://github.com/IlleNilsson/xmip-core-contract", branch = "main" }
-path = { package = "xmip-core-path", git = "https://github.com/IlleNilsson/xmip-core-path", branch = "main" }
+# The unit's declaration and the stage it runs at.
+node = { package = "xmip-core-node", git = "https://github.com/IlleNilsson/xmip-core-node", branch = "main" }
+context = { package = "xmip-core-context", git = "https://github.com/IlleNilsson/xmip-core-context", branch = "main", optional = true }
+contract = { package = "xmip-core-contract", git = "https://github.com/IlleNilsson/xmip-core-contract", branch = "main", optional = true }
+path = { package = "xmip-core-path", git = "https://github.com/IlleNilsson/xmip-core-path", branch = "main", optional = true }
 xcore = { package = "xmip-core", git = "https://github.com/IlleNilsson/xmip-core", branch = "main" }
 
 [dev-dependencies]
