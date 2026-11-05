@@ -16,4 +16,4 @@ selector do.
 
 `doc/architecture/runtime-model.md` section 9 governs it, and the selector
 language is `module/core/capability/promote/doc/content-selector.md`;
-`architecture.toml` carries the maturity.
+`architecture.xmip` carries the maturity.
