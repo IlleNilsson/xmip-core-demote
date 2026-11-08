@@ -37,6 +37,13 @@ pub const DECLARATION: &Declaration = &Declaration {
                 meaning: "The path the value is written to, in its language.",
                 applies: Applies::Both,
             },
+            Setting {
+                name: "namespaces",
+                kind: Kind::Table,
+                presence: Presence::Optional,
+                meaning: "Each prefix the path uses, bound to its namespace URI.",
+                applies: Applies::Both,
+            },
         ],
     },
 };
