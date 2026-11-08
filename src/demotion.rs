@@ -243,7 +243,7 @@ mod tests {
         apply_to_structure(&context, &mut rewriting, &demotions).expect("writes");
 
         let written = rewriting.finish().expect("finishes");
-        assert_eq!(written.bytes(), b"order=A-1;status=closed");
+        assert_eq!(written.load().expect("held"), b"order=A-1;status=closed");
         assert!(
             Demotion {
                 target_path: Path::new("xpath", "/order"),
