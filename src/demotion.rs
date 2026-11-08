@@ -183,7 +183,9 @@ mod tests {
         fn compile(
             &self,
             expression: &str,
+            namespaces: &path::Namespaces,
         ) -> Result<Box<dyn path::CompiledExpression>, ContractError> {
+            namespaces.unused_by(self.language())?;
             Ok(Box::new(Key(format!("{expression}="))))
         }
     }
