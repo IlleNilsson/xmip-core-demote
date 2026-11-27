@@ -1,8 +1,8 @@
 [package]
 name = "xmip-core-demote"
-version = "0.1.0"
-edition = "2024"
-license = "AGPL-3.0-or-later"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 repository = "https://github.com/IlleNilsson/xmip-core-demote"
 description = "Demotion from Xmip Message Context into structured messages and executable artifacts."
 
@@ -24,3 +24,5 @@ xcore = { package = "xmip-core", git = "https://github.com/IlleNilsson/xmip-core
 [dev-dependencies]
 # Only the tests build a Stream to rewrite.
 stream = { package = "xmip-core-stream", git = "https://github.com/IlleNilsson/xmip-core-stream", branch = "main" }
+
+[lints]
